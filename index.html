@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 MyJobSee - Automated Job Applications</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-top: 50px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin: 0 10px;
+            background-color: #ccc;
+        }
+
+        .step.active {
+            background-color: #667eea;
+        }
+
+        .step.complete {
+            background-color: #4CAF50;
+        }
+
+        .step-line {
+            width: 50px;
+            height: 2px;
+            background-color: #ddd;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button {
+            width: 100%;
+            padding: 15px;
+            background-color: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .button:hover {
+            background-color: #5a67d8;
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button.success {
+            background-color: #4CAF50;
+        }
+
+        .button.success:hover {
+            background-color: #45a049;
+        }
+
+        .job-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+            transition: box-shadow 0.3s;
+        }
+
+        .job-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .job-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .job-company {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background-color: #e3f2fd;
+            color: #1976d2;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .message {
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 8px;
+            color: #1976d2;
+        }
+
+        .message.error {
+            background-color: #ffebee;
+            border-color: #f8bbd9;
+            color: #c62828;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .nav-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .nav-button.primary {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .nav-button.secondary {
+            background-color: #999;
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin-top: 20px;
+                padding: 20px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .navigation-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🚀 MyJobSee</h1>
+            <p class="subtitle">Automated Job Applications</p>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="progress-steps">
+            <div class="step active" id="step1">1</div>
+            <div class="step-line"></div>
+            <div class="step" id="step2">2</div>
+            <div class="step-line"></div>
+            <div class="step" id="step3">3</div>
+        </div>
+
+        <!-- Registration Form -->
+        <div id="registerForm">
+            <h2 style="text-align: center; margin-bottom: 30px;">Step 1: Register Your Account</h2>
+            <div class="form-group">
+                <label class="label">Email Address</label>
+                <input type="email" class="input" id="emailInput" placeholder="your.email@example.com" required>
+            </div>
+            <button class="button" id="registerBtn" onclick="registerUser()">📝 Register Now</button>
+        </div>
+
+        <!-- Job Search Form -->
+        <div id="searchForm" class="hidden">
+            <h2 style="text-align: center; margin-bottom: 30px;">Step 2: Search for Jobs</h2>
+            <div class="form-group">
+                <label class="label">Job Keywords</label>
+                <input type="text" class="input" id="keywordsInput" placeholder="e.g., software developer, marketing manager" required>
+            </div>
+            <div class="form-group">
+                <label class="label">Location (Optional)</label>
+                <input type="text" class="input" id="locationInput" placeholder="e.g., New York, London, Remote">
+            </div>
+            <button class="button success" id="searchBtn" onclick="searchJobs()">🔍 Start Job Search</button>
+        </div>
+
+        <!-- Results -->
+        <div id="resultsForm" class="hidden">
+            <h2 style="text-align: center; margin-bottom: 30px;">Step 3: Your Job Results</h2>
+            
+            <div class="navigation-buttons">
+                <button class="nav-button primary" onclick="goToSearch()">🔍 Search More Jobs</button>
+                <button class="nav-button secondary" onclick="resetApp()">👤 New User</button>
+            </div>
+
+            <div id="jobResults"></div>
+        </div>
+
+        <!-- Message Display -->
+        <div id="messageDiv" class="hidden"></div>
+
+        <!-- Footer -->
+        <div class="footer">
+            💡 Tip: Make sure your backend is running on http://192.168.1.72:5000
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://192.168.1.72:5000/api';
+        let userId = null;
+        let currentStep = 'register';
+
+        // UI Helper Functions
+        function showMessage(text, isError = false) {
+            const messageDiv = document.getElementById('messageDiv');
+            messageDiv.textContent = text;
+            messageDiv.className = isError ? 'message error' : 'message';
+            messageDiv.classList.remove('hidden');
+            
+            // Hide message after 5 seconds
+            setTimeout(() => {
+                messageDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        function updateSteps(step) {
+            // Reset all steps
+            document.getElementById('step1').className = 'step';
+            document.getElementById('step2').className = 'step';
+            document.getElementById('step3').className = 'step';
+            
+            // Update based on current step
+            if (step === 'register') {
+                document.getElementById('step1').className = 'step active';
+            } else if (step === 'search') {
+                document.getElementById('step1').className = 'step complete';
+                document.getElementById('step2').className = 'step active';
+            } else if (step === 'results') {
+                document.getElementById('step1').className = 'step complete';
+                document.getElementById('step2').className = 'step complete';
+                document.getElementById('step3').className = 'step active';
+            }
+        }
+
+        function showForm(formName) {
+            // Hide all forms
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('searchForm').classList.add('hidden');
+            document.getElementById('resultsForm').classList.add('hidden');
+            
+            // Show the requested form
+            document.getElementById(formName + 'Form').classList.remove('hidden');
+            currentStep = formName;
+            updateSteps(formName);
+        }
+
+        function setLoading(buttonId, isLoading, originalText) {
+            const button = document.getElementById(buttonId);
+            if (isLoading) {
+                button.disabled = true;
+                button.textContent = '🔄 ' + originalText + '...';
+                document.querySelector('.container').classList.add('loading');
+            } else {
+                button.disabled = false;
+                button.textContent = originalText;
+                document.querySelector('.container').classList.remove('loading');
+            }
+        }
+
+        // API Functions
+        async function registerUser() {
+            const email = document.getElementById('emailInput').value.trim();
+            
+            if (!email) {
+                showMessage('❌ Please enter your email address', true);
+                return;
+            }
+
+            setLoading('registerBtn', true, 'Registering');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    userId = data.user_id;
+                    showMessage(`✅ Registration successful! User ID: ${data.user_id}`);
+                    showForm('search');
+                } else {
+                    showMessage(`❌ Error: ${data.error}`, true);
+                }
+            } catch (error) {
+                showMessage(`❌ Network Error: ${error.message}`, true);
+            } finally {
+                setLoading('registerBtn', false, '📝 Register Now');
+            }
+        }
+
+        async function searchJobs() {
+            const keywords = document.getElementById('keywordsInput').value.trim();
+            const location = document.getElementById('locationInput').value.trim();
+            
+            if (!keywords) {
+                showMessage('❌ Please enter job keywords', true);
+                return;
+            }
+
+            setLoading('searchBtn', true, 'Searching Jobs');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/apply-jobs`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        keywords,
+                        location,
+                        num_jobs: 5
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayJobResults(data.jobs || []);
+                    showMessage(`🎉 Found ${data.jobs_found} jobs!`);
+                    showForm('results');
+                } else {
+                    showMessage(`❌ Error: ${data.error}`, true);
+                }
+            } catch (error) {
+                showMessage(`❌ Network Error: ${error.message}`, true);
+            } finally {
+                setLoading('searchBtn', false, '🔍 Start Job Search');
+            }
+        }
+
+        function displayJobResults(jobs) {
+            const resultsDiv = document.getElementById('jobResults');
+            
+            if (jobs.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div style="text-align: center; padding: 40px;">
+                        <p style="color: #999;">No jobs found. Try different keywords or location.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            jobs.forEach(job => {
+                html += `
+                    <div class="job-card">
+                        <div class="job-title">${job.title}</div>
+                        <div class="job-company">${job.company}</div>
+                        <span class="badge">${job.platform}</span>
+                    </div>
+                `;
+            });
+            
+            resultsDiv.innerHTML = html;
+        }
+
+        // Navigation Functions
+        function goToSearch() {
+            showForm('search');
+        }
+
+        function resetApp() {
+            userId = null;
+            document.getElementById('emailInput').value = '';
+            document.getElementById('keywordsInput').value = '';
+            document.getElementById('locationInput').value = '';
+            document.getElementById('jobResults').innerHTML = '';
+            showForm('register');
+        }
+
+        // Enter key support
+        document.getElementById('emailInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') registerUser();
+        });
+
+        document.getElementById('keywordsInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchJobs();
+        });
+    </script>
+</body>
+</html>
