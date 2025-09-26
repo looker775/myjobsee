@@ -1,13 +1,27 @@
 {
-  "name": "myjobsee-frontend",
+  "name": "jobsee-frontend",
   "version": "1.0.0",
-  "description": "Job Application Service Frontend - Simple HTML",
-  "main": "index.html",
+  "private": true,
   "scripts": {
-    "start": "python -m http.server 3000",
-    "dev": "python -m http.server 3000"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
-  "keywords": ["job", "application", "automation"],
-  "author": "Your Name",
-  "license": "MIT"
+  "dependencies": {
+    "next": "14.0.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "@supabase/supabase-js": "^2.38.0",
+    "square": "^27.0.0",
+    "@square/web-sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.0",
+    "typescript": "^5"
+  }
 }
