@@ -1,0 +1,13 @@
+{
+  "name": "myjobsee-frontend",
+  "version": "1.0.0",
+  "description": "Job Application Service Frontend - Simple HTML",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 3000",
+    "dev": "python -m http.server 3000"
+  },
+  "keywords": ["job", "application", "automation"],
+  "author": "Your Name",
+  "license": "MIT"
+}
