@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🚀 JobSee</title>
-    <!-- Load the latest Supabase JS library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/module.js"></script>
-    <!-- Load Square JS SDK (for payment, if needed later) -->
+    <!-- Load Supabase from CDN -->
+    <script src="https://cdn.skypack.dev/@supabase/supabase-js"></script>
+    <!-- Load Square JS SDK -->
     <script src="https://js.squareupsandbox.com/v2/paymentform"></script>
     <style>
         body {
@@ -47,11 +47,11 @@
     <h2>Professional Job Application Service - Apply to 500+ Jobs Automatically</h2>
 
     <div class="steps-indicator">
-        <div class="step-circle active">1</div>
-        <div class="step-circle">2</div>
-        <div class="step-circle">3</div>
-        <div class="step-circle">4</div>
-        <div class="step-circle">5</div>
+        <div class="step-circle active" id="indicator1">1</div>
+        <div class="step-circle" id="indicator2">2</div>
+        <div class="step-circle" id="indicator3">3</div>
+        <div class="step-circle" id="indicator4">4</div>
+        <div class="step-circle" id="indicator5">5</div>
     </div>
 
     <div id="step1" class="step active">
@@ -137,29 +137,45 @@
         <h3>Step 3: Setup Your Profile</h3>
 
         <div>
-            <input type="email" id="linkedinEmail" placeholder="LinkedIn Email *" required>
-            <input type="password" id="linkedinPassword" placeholder="LinkedIn Password *" required>
+            <div class="form-group">
+                <input type="email" id="linkedinEmail" placeholder="LinkedIn Email *" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="linkedinPassword" placeholder="LinkedIn Password *" required>
+            </div>
         </div>
 
         <div>
-            <textarea id="targetJobTitles" placeholder="Target Job Titles (one per line) *" required></textarea>
-            <textarea id="targetLocations" placeholder="Target Locations (one per line)"></textarea>
+            <div class="form-group">
+                <textarea id="targetJobTitles" placeholder="Target Job Titles (one per line) *" required></textarea>
+            </div>
+            <div class="form-group">
+                <textarea id="targetLocations" placeholder="Target Locations (one per line)"></textarea>
+            </div>
         </div>
 
         <div>
-            <select id="experienceLevel" required>
-                <option value="">Experience Level</option>
-                <option value="entry">Entry Level (0-2 years)</option>
-                <option value="mid">Mid Level (2-5 years)</option>
-                <option value="senior">Senior Level (5-10 years)</option>
-                <option value="executive">Executive Level (10+ years)</option>
-            </select>
-            <input type="text" id="salaryExpectation" placeholder="Salary Expectation">
+            <div class="form-group">
+                <select id="experienceLevel" required>
+                    <option value="">Experience Level</option>
+                    <option value="entry">Entry Level (0-2 years)</option>
+                    <option value="mid">Mid Level (2-5 years)</option>
+                    <option value="senior">Senior Level (5-10 years)</option>
+                    <option value="executive">Executive Level (10+ years)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="text" id="salaryExpectation" placeholder="Salary Expectation">
+            </div>
         </div>
 
         <div>
-            <textarea id="resumeSummary" placeholder="Resume Summary"></textarea>
-            <textarea id="coverLetterTemplate" placeholder="Cover Letter Template"></textarea>
+            <div class="form-group">
+                <textarea id="resumeSummary" placeholder="Resume Summary"></textarea>
+            </div>
+            <div class="form-group">
+                <textarea id="coverLetterTemplate" placeholder="Cover Letter Template"></textarea>
+            </div>
         </div>
         <button id="profileBtn" onclick="saveProfile()">Save Profile & Continue →</button>
     </div>
@@ -196,18 +212,77 @@
         <div id="applications"></div>
     </div>
 
-    <div id="message" class="message"></div>
+    <div id="message" class="message" style="display: none;"></div>
 
     <script>
-        // Replace the API_BASE_URL
+        // Replace with your actual Supabase credentials
         const SUPABASE_URL = 'https://sapcolwaecrjyiqomrnp.supabase.co';
-        const SUPABASE_ANON_KEY = 'your-anon-key'; // Replace with your actual Anon Key
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhcGNvbHdhZWNyanlpcW9tcm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MDc3NTksImV4cCI6MjA3NDQ4Mzc1OX0.nafzn8TBFPr6Z4XgQAKnFW186O-NFdU7wAidG4s-dxg'; // Replace with your actual Anon Key
 
         // Initialize Supabase client
-        const { createClient } = Supabase;
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Update your registerUser function
+        // Plan configuration
+        let selectedPlan = 'basic';
+        const PLANS = {
+            'basic': { price: 29.99, jobs: 100, name: 'Basic Plan' },
+            'premium': { price: 49.99, jobs: 500, name: 'Premium Plan' },
+            'enterprise': { price: 79.99, jobs: 1000, name: 'Enterprise Plan' }
+        };
+
+        // Update selected plan when radio buttons change
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('input[name="plan"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    selectedPlan = e.target.value;
+                    updatePlanDisplay();
+                });
+            });
+            updatePlanDisplay();
+        });
+
+        function updatePlanDisplay() {
+            document.getElementById('selectedPlanName').textContent = PLANS[selectedPlan].name;
+            document.getElementById('selectedPlanPrice').textContent = `$${PLANS[selectedPlan].price}`;
+            document.getElementById('selectedPlanJobs').textContent = `${PLANS[selectedPlan].jobs}+`;
+            document.getElementById('applicationsAvailable').textContent = PLANS[selectedPlan].jobs;
+            document.getElementById('applicationsCount').textContent = PLANS[selectedPlan].jobs;
+        }
+
+        function updateStepIndicator(currentStep) {
+            document.querySelectorAll('.step-circle').forEach((circle, index) => {
+                if (index + 1 <= currentStep) {
+                    circle.classList.add('active');
+                } else {
+                    circle.classList.remove('active');
+                }
+            });
+        }
+
+        function showStep(stepNumber) {
+            document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+            document.getElementById(`step${stepNumber}`).classList.add('active');
+            updateStepIndicator(stepNumber);
+        }
+
+        function showMessage(text, type = 'success') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function setLoading(btnId, isLoading, text) {
+            const btn = document.getElementById(btnId);
+            btn.disabled = isLoading;
+            btn.textContent = isLoading ? `${text}...` : text;
+        }
+
+        // Register user with Supabase
         async function registerUser() {
             const fullName = document.getElementById('fullNameInput').value.trim();
             const phone = document.getElementById('phoneInput').value.trim();
@@ -222,7 +297,7 @@
 
             try {
                 // Sign up with Supabase Auth
-                const { data, error } = await supabase.auth.signUp({
+                const { data, error } = await supabaseClient.auth.signUp({
                     email: email,
                     password: 'temp123', // In production, let user set password
                     options: {
@@ -236,7 +311,7 @@
                 if (error) throw error;
 
                 // Create profile
-                await supabase.from('user_profiles').insert({
+                const { error: profileError } = await supabaseClient.from('user_profiles').insert({
                     auth_user_id: data.user.id,
                     email: email,
                     full_name: fullName,
@@ -244,21 +319,24 @@
                     subscription_plan: selectedPlan
                 });
 
+                if (profileError) throw profileError;
+
                 showMessage('Registration successful!', 'success');
-                showForm('paymentForm');
+                showStep(2);
+                
             } catch (error) {
                 showMessage(`Registration failed: ${error.message}`, 'error');
             } finally {
-                setLoading('registerBtn', false, 'Continue to Payment');
+                setLoading('registerBtn', false, 'Continue to Payment →');
             }
         }
 
-        // Update processPayment function
+        // Process payment
         async function processPayment() {
             setLoading('payBtn', true, 'Processing Payment');
 
             try {
-                const { data, error } = await supabase.functions.invoke('process-payment', {
+                const { data, error } = await supabaseClient.functions.invoke('process-payment', {
                     body: {
                         source_id: 'mock_payment_token', // Replace with actual Square token
                         plan: selectedPlan,
@@ -269,20 +347,67 @@
                 if (error) throw error;
 
                 showMessage('Payment successful! Account activated.', 'success');
-                showForm('profileForm');
+                showStep(3);
+                
             } catch (error) {
                 showMessage(`Payment failed: ${error.message}`, 'error');
             } finally {
-                setLoading('payBtn', false, 'Pay Securely');
+                setLoading('payBtn', false, '💳 Pay Securely');
             }
         }
 
-        // Update startJobApplications function
+        // Save profile
+        async function saveProfile() {
+            const linkedinEmail = document.getElementById('linkedinEmail').value.trim();
+            const linkedinPassword = document.getElementById('linkedinPassword').value.trim();
+            const targetJobTitles = document.getElementById('targetJobTitles').value.trim();
+            const targetLocations = document.getElementById('targetLocations').value.trim();
+            const experienceLevel = document.getElementById('experienceLevel').value;
+            const salaryExpectation = document.getElementById('salaryExpectation').value.trim();
+            const resumeSummary = document.getElementById('resumeSummary').value.trim();
+            const coverLetterTemplate = document.getElementById('coverLetterTemplate').value.trim();
+
+            if (!linkedinEmail || !linkedinPassword || !targetJobTitles) {
+                showMessage('LinkedIn credentials and job titles are required', 'error');
+                return;
+            }
+
+            setLoading('profileBtn', true, 'Saving Profile');
+
+            try {
+                const userEmail = document.getElementById('emailInput').value;
+                
+                const { error } = await supabaseClient.from('user_profiles')
+                    .update({
+                        linkedin_email: linkedinEmail,
+                        linkedin_password_encrypted: linkedinPassword, // In production, encrypt this
+                        target_job_titles: targetJobTitles.split('\n').filter(t => t.trim()),
+                        target_locations: targetLocations.split('\n').filter(l => l.trim()) || ['Remote'],
+                        experience_level: experienceLevel,
+                        salary_expectation: salaryExpectation,
+                        resume_text: resumeSummary,
+                        cover_letter_template: coverLetterTemplate
+                    })
+                    .eq('email', userEmail);
+
+                if (error) throw error;
+
+                showMessage('Profile updated successfully!', 'success');
+                showStep(4);
+                
+            } catch (error) {
+                showMessage(`Profile update failed: ${error.message}`, 'error');
+            } finally {
+                setLoading('profileBtn', false, 'Save Profile & Continue →');
+            }
+        }
+
+        // Start job applications
         async function startJobApplications() {
             setLoading('startBtn', true, 'Starting Applications');
 
             try {
-                const { data, error } = await supabase.functions.invoke('start-job-search', {
+                const { data, error } = await supabaseClient.functions.invoke('start-job-search', {
                     body: {
                         user_email: document.getElementById('emailInput').value
                     }
@@ -291,47 +416,83 @@
                 if (error) throw error;
 
                 showMessage('Job applications started!', 'success');
-                showForm('dashboardForm');
+                showStep(5);
+                
             } catch (error) {
                 showMessage(`Error: ${error.message}`, 'error');
             } finally {
-                setLoading('startBtn', false, 'Start Applying to Jobs Now!');
+                setLoading('startBtn', false, '🚀 Start Applying to Jobs Now!');
             }
         }
 
-        // Helper functions (assuming they were in your original code; if not, these are basic implementations)
-        let selectedPlan = 'basic';
-        const PLANS = {
-            'basic': { price: 29.99, jobs: 100, name: 'Basic Plan' },
-            'premium': { price: 49.99, jobs: 500, name: 'Premium Plan' },
-            'enterprise': { price: 79.99, jobs: 1000, name: 'Enterprise Plan' }
-        };
+        // Dashboard functions
+        async function refreshStats() {
+            try {
+                const userEmail = document.getElementById('emailInput').value;
+                const { data, error } = await supabaseClient
+                    .from('user_profiles')
+                    .select('jobs_applied_count, job_application_limit')
+                    .eq('email', userEmail)
+                    .single();
 
-        function showMessage(text, type = 'success') {
-            const messageDiv = document.getElementById('message');
-            messageDiv.textContent = text;
-            messageDiv.className = `message ${type}`;
+                if (error) throw error;
+
+                document.getElementById('stats').innerHTML = `
+                    <div style="background: #fff; color: #333; padding: 20px; border-radius: 8px; margin: 10px 0;">
+                        <h4>Your Statistics</h4>
+                        <p>Jobs Applied: ${data.jobs_applied_count}</p>
+                        <p>Applications Remaining: ${data.job_application_limit - data.jobs_applied_count}</p>
+                        <p>Total Limit: ${data.job_application_limit}</p>
+                    </div>
+                `;
+                
+            } catch (error) {
+                showMessage(`Error loading stats: ${error.message}`, 'error');
+            }
         }
 
-        function showForm(formId) {
-            document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
-            document.getElementById(formId).classList.add('active');
-        }
+        async function viewApplications() {
+            try {
+                // Get user ID first
+                const userEmail = document.getElementById('emailInput').value;
+                const { data: profile, error: profileError } = await supabaseClient
+                    .from('user_profiles')
+                    .select('id')
+                    .eq('email', userEmail)
+                    .single();
 
-        function setLoading(btnId, isLoading, text) {
-            const btn = document.getElementById(btnId);
-            btn.disabled = isLoading;
-            btn.textContent = isLoading ? `${text}...` : text;
-        }
+                if (profileError) throw profileError;
 
-        // Initialize on load
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('selectedPlanName').textContent = PLANS[selectedPlan].name;
-            document.getElementById('selectedPlanPrice').textContent = `$${PLANS[selectedPlan].price}`;
-            document.getElementById('selectedPlanJobs').textContent = `${PLANS[selectedPlan].jobs}+`;
-            document.getElementById('applicationsAvailable').textContent = PLANS[selectedPlan].jobs;
-            document.getElementById('applicationsCount').textContent = PLANS[selectedPlan].jobs;
-        });
+                const { data, error } = await supabaseClient
+                    .from('job_applications')
+                    .select('*')
+                    .eq('user_id', profile.id)
+                    .order('applied_at', { ascending: false });
+
+                if (error) throw error;
+
+                let applicationsHTML = '<div style="background: #fff; color: #333; padding: 20px; border-radius: 8px; margin: 10px 0;"><h4>Your Applications</h4>';
+                
+                if (data.length === 0) {
+                    applicationsHTML += '<p>No applications yet. Applications are being processed in the background.</p>';
+                } else {
+                    data.forEach(app => {
+                        applicationsHTML += `
+                            <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                                <strong>${app.job_title}</strong> at <em>${app.company}</em><br>
+                                <small>Platform: ${app.platform} | Status: ${app.application_status} | Applied: ${new Date(app.applied_at).toLocaleDateString()}</small>
+                            </div>
+                        `;
+                    });
+                }
+                
+                applicationsHTML += '</div>';
+                document.getElementById('applications').innerHTML = applicationsHTML;
+                
+            } catch (error) {
+                showMessage(`Error loading applications: ${error.message}`, 'error');
+            }
+        }
     </script>
 </body>
 </html>
