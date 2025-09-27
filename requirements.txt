@@ -1,8 +1,4 @@
-flask==2.3.3
-flask-sqlalchemy==3.0.5
-flask-cors==4.0.0
-selenium==4.15.2
-squareup==43.1.2.20250924
-python-dotenv==1.0.0
-requests==2.31.0
-webdriver-manager==4.0.1
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+asyncpg==0.28.0
+
