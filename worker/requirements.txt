@@ -1,0 +1,3 @@
+echo fastapi==0.104.1 > requirements.txt
+echo uvicorn[standard]==0.24.0 >> requirements.txt
+echo asyncpg==0.28.0 >> requirements.txt
